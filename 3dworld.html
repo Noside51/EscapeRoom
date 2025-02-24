@@ -1,0 +1,417 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+	<script src="water.js"></script>
+	<script src="script.js"></script>
+	<script src="room.js"></script>
+	<script src="table.js"></script>
+	<script src="PhyObj.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@fb96ab2/dist/aframe-extras.min.js"></script>
+	<script src="kinema.js"></script>
+	<link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <a-scene 
+			 stats="false"
+             environment
+             physics="driver: local; stats: panel; debug: false">
+	<!-- http://localhost:8098/3dworld.html -->			 
+	<a-assets>
+	<a-asset-item id="flashlight" src="flashlight/scene.gltf"></a-asset-item>
+	<a-asset-item id="key" src="door_key/scene.gltf"></a-asset-item>
+	</a-assets>
+	
+	<a-plane position="0 0 -1" rotation="-90 0 0" width="1000" height="1000" color="black" static-body></a-plane>
+    <a-sky color="#4CC3D9"></a-sky>
+	
+	<div id="popup" style="display: none;">
+		<h2>Welcome to The Escape Room</h2>
+		<p>For starters, this room is going to contain a lot of notes around the wall. 
+			The key is to the right but is locked behind a layer of glass to open. Click on the mystical glass and "speak" your answer. 
+			You must find a way to open it. 
+			The notes around you are clues for you to solve to get the hidden word.</p>
+		<button onclick="document.getElementById('popup').style.display = 'none'">Close</button>
+		<br><br>
+		<a href="index.html" class="button">Back to Website</a>
+	  </div>
+	  
+	  <div id="answerPopup" style="display: none;">
+		<h2>Submit Your Answer</h2>
+		<input type="text" id="userAnswer" placeholder="Input Correct Answer Here">
+		<button onclick=checkAnswer()>Submit</button>
+		<button onclick="document.getElementById('answerPopup').style.display = 'none'">Close</button>
+		<p id="result"></p>
+	  </div>
+
+	  <div id="faraway" style="display: none;">
+		<h2>You are getting farther, turn around</h2>
+		<p>If you see this message again, turn around again</p>
+		<button onclick="document.getElementById('faraway').style.display = 'none'">Close</button>
+	  </div>
+
+	  <div id="phint1" style="display: none;">
+		<h2>Hint Number 1</h2>
+		<p>Take the first letter of the answer, which is the first letter for the key. <br>
+			If you're working with a tall person, what's one piece of advice you can give them while you're in the air, land, or sea if a large beam is coming towards them?</p>
+		<button onclick="document.getElementById('phint1').style.display = 'none'">Close</button>
+	  </div>
+	  <div id="phint2" style="display: none;">
+		<h2>Hint Number 2</h2>
+		<p>Take the first letter of the answer, which is the second letter for the key. <br> 
+			What is exactly 1 foot long and has a number written onto it?</p>
+		<button onclick="document.getElementById('phint2').style.display = 'none'">Close</button>
+	  </div>
+	  <div id="phint3" style="display: none;">
+		<h2>Hint Number 3</h2>
+		<p>You found the easy one! This is the third letter for the key <br> 
+			I am the 15th letter of the alphabet. What am I?</p>
+		<button onclick="document.getElementById('phint3').style.display = 'none'">Close</button>
+	  </div>
+	  <div id="phint4" style="display: none;">
+		<h2>Hint Number 4</h2>
+		<p>Take the first letter of the answer, which is the fourth letter for the key <br> 
+			Many people get into arguments on whether I am wet or not.</p>
+		<button onclick="document.getElementById('phint4').style.display = 'none'">Close</button>
+	  </div>
+	  <div id="phint5" style="display: none;">
+		<h2>Hint Number 5</h2>
+		<p>Take the first letter of the answer, which is the fifth letter for the key <br>
+			I have 2 letters in my name; they both repeat once only, and I am a time of day. What am I?</p>
+		<button onclick="document.getElementById('phint5').style.display = 'none'">Close</button>
+	  </div>
+
+	  <a-box id="clickbox" color="white" position="0 .85 .75" static-body interact height=".1">
+	</a-box>
+
+	<a-box id="hint1" color="white" rotation="90" position="3 3 .125" static-body interact height=".1">
+	</a-box>
+	<a-box id="hint2" color="white" position="-1 .125 5" static-body interact height=".1">
+	</a-box>
+	<a-box id="hint3" color="white" rotation="90" position="-2 5 .125" static-body interact height=".1">
+	</a-box>
+	<a-box id="hint4" color="white" rotation="90" position="3 3 11.9" static-body interact height=".1">
+	</a-box>
+	<a-box id="hint5" color="white" rotation="0 0 90" position="5.9 3 3" static-body interact height=".1">
+	</a-box>
+
+	<a-box id="far1" color="white" position="15 .1 -10" static-body interact height=".1">
+	</a-box>
+	<a-box id="far2" color="white" position="-15 .1 .10" static-body interact height=".1">
+	</a-box>
+	<a-box id="far3" color="white" position="-13 .1 -10" static-body interact height=".1">
+	</a-box>
+	<a-box id="far4" color="white" position="-1 .1 -11" static-body interact height=".1">
+	</a-box>
+
+
+	<a-box id="worthless" color="white" rotation="90" position="3 3 .125" static-body interact height=".1"></a-box>
+	<a-box id="worthless" color="white" rotation="90" position="1 5 .125" static-body interact height=".1"></a-box>
+	<a-box id="worthless" color="white" rotation="90" position="-5 2 .125" static-body interact height=".1"></a-box>
+	<a-box id="worthless" color="white" rotation="90" position="-2 5 .125" static-body interact height=".1"></a-box>
+	<a-box id="worthless" color="white" rotation="90" position="4 3 .125" static-body interact height=".1"></a-box>
+	<a-box id="worthless" color="white" rotation="90" position="-1 1 .125" static-body interact height=".1"></a-box>
+	<a-box id="worthless" color="white" rotation="90" position="0 3.4 .125" static-body interact height=".1"></a-box>
+	
+
+	<a-box id="worthless" color="white" position="1 .125 5" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="-3 .125 3" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="-1 .125 5" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="2 .125 6" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="-5 .125 2" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="1 .125 7" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="6 .125 3" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="-1 .125 7" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="2 .125 6" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="5 .125 2" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" position="5 .125 2" static-body interact height=".1">
+	</a-box>
+
+
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 5 3" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 5 7" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 3 5" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 5 1" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 1.5 2" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 2 8" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 4 10" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 2 11" static-body interact height=".1">
+	</a-box>
+	
+	<a-box id="worthless" color="white" rotation="0 0 90" position="-5.9 5 3" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="-5.9 5 7" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="-5.9 3 5" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="-5.9 5 1" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="5.9 1.5 2" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="-5.9 2 8" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="-5.9 4 10" static-body interact height=".1">
+	</a-box>
+	<a-box id="worthless" color="white" rotation="0 0 90" position="-5.9 2 11" static-body interact height=".1">
+	</a-box>
+
+	<a-sphere id="wordbox" color="lightblue" position="5.25 0.5 0.55" opacity=".5" static-body interact height="1">
+	</a-sphere>
+
+	<a-ocean id="ocean" position="0 -1 6" width="120" depth="120" speed="2"></a-ocean>
+	<a-ocean id="ocean2" position="0 -1 6" width="36" depth="36" speed="2"></a-ocean>
+	<a-ocean id="ocean3" position="0 -1 6" width="12" depth="12" speed="2"></a-ocean>
+
+		<a-entity id="room1" shadow="receive: true" position="0 0 12">
+			<a-box id="door" width="4" height="4" depth="0.1" color="#A1662F" position="0 2 0" static-body interact></a-box>
+			<a-entity position="0 0 0">
+			  <a-box id="w11" width="4" height="6" depth="0.1" position="-4 3 0" color="black" static-body></a-box>
+			  <a-box id="w12" width="4" height="6" depth="0.1" position="4 3 0" color="black" static-body></a-box>
+			  <a-box id="w13" width="4" height="0" depth="0.1" position="0 1 0" color="red"></a-box>
+			  <a-box id="w14" width="4" height="2" depth="0.1" position="0 5 0" color="black" static-body></a-box>
+			</a-entity>
+			<a-entity id="w2" rotation="0 90 0" position="6 0 -6" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-4 3 0" color="black"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="4 3 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 1 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 5 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black"></a-box>
+			</a-entity>
+			<a-entity id="w3" rotation="0 90 0" position="-6 0 -6" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-4 3 0" color="black"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="4 3 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 1 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 5 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black"></a-box>
+			</a-entity>
+			<a-entity id="w4" position="0 0 -12" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-4 3 0" color="black"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="4 3 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 1 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 5 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black"></a-box>
+			</a-entity>
+			<a-entity id="floor" position="0 0 -6" static-body>
+			  <a-box width="12" height="0.1" depth="12"  color="black"></a-box>
+			</a-entity>
+			<a-entity id="roof" position="0 6 -6" static-body>
+			  <a-box width="12" height="0.1" depth="12"  color="black" ></a-box>
+			</a-entity>
+		</a-entity>
+		
+		<a-entity id="room2" shadow="receive: true" position="0 0 24">
+			<a-box id="door2" width="4" height="4" depth="0.1" color="#A1662F" position="0 6 0" scale="3 3 3" static-body interact></a-box>
+			<a-entity position="0 0 0">
+			  <a-box id="w112" width="4" height="6" depth="0.1" position="-12 9 0" color="black" scale="3 3 3" static-body></a-box>
+			  <a-box id="w122" width="4" height="6" depth="0.1" position="12 9 0" color="black" scale="3 3 3" static-body></a-box>
+			  <a-box id="w132" width="4" height="0" depth="0.1" position="0 3 0" color="red" scale="3 3 3"></a-box>
+			  <a-box id="w142" width="4" height="2" depth="0.1" position="0 15 0" color="black" scale="3 3 3" static-body></a-box>
+			</a-entity>
+			<a-entity id="w22" rotation="0 90 0" position="18 0 -18" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-12 9 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="12 9 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 15 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 9 0" color="black" scale="3 3 3"></a-box>
+			</a-entity>
+			<a-entity id="w32" rotation="0 90 0" position="-18 0 -18" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-12 9 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="12 9 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 15 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 9 0" color="black" scale="3 3 3"></a-box>
+			</a-entity>
+			<a-entity id="w42" position="0 0 -36" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-12 9 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="12 9 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 15 0" color="black" scale="3 3 3"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 9 0" color="black" scale="3 3 3"></a-box>
+			</a-entity>
+			<a-entity id="floor2" position="0 0 -18" static-body>
+			  <a-box width="36" height="0.1" depth="36"  color="black" ></a-box>
+			</a-entity>
+			<a-entity id="roof2" position="0 18 -18" static-body>
+			  <a-box width="36" height="0.1" depth="36"  color="black" ></a-box>
+			</a-entity>
+		</a-entity>
+		
+		<a-entity id="bigroom" shadow="receive: true" position="0 0 66">
+			<a-entity id="w130" position="0 0 0" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-40 30 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="40 30 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 10 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 50 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 30 0" color="black" scale="10, 10, 10"></a-box>
+			</a-entity>
+			<a-entity id="w230" rotation="0 90 0" position="60 0 -60" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-40 30 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="40 30 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 10 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 50 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 30 0" color="black" scale="10, 10, 10"></a-box>
+			</a-entity>
+			<a-entity id="w330" rotation="0 90 0" position="-60 0 -60" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-40 30 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="40 30 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 10 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 50 0" color="black" scale="10, 10, 10"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 30 0" color="black" scale="10, 10, 10"></a-box>
+			</a-entity>
+			<a-entity id="w430" position="0 0 -120">
+				<a-box width="12" height="4.825" depth="0.1" position="0 36 0" color="black" scale="10 10 10" static-body></a-box>
+
+			</a-entity>
+			<a-entity id="floor3" position="0 0 -60" static-body>
+			  <a-box width="12" height="0.01" depth="12"  color="black" scale="10, 10, 10"></a-box>
+			</a-entity>
+			<a-entity id="roof3" position="0 60 -60" static-body>
+			  <a-box width="12" height="0.01" depth="12"  color="black" scale="10, 10, 10"></a-box>
+			</a-entity>
+		</a-entity>
+		
+	<a-entity id="endroom" position="18.5 0 -54" rotation="0 0 0">
+		<a-entity id="endroom1" shadow="receive: true">
+			<a-box id="door3" width="4" height="4" depth="0.1" color="#A1662F" position="0 2 0" static-body interact></a-box>
+			<a-box id="door4" width="4" height="4" depth="0.1" color="#A1662F" position="0 2 -12" static-body interact></a-box>
+			<a-entity position="0 0 0">
+			  <a-box id="w11" width="4" height="6" depth="0.1" position="-4 3 0" color="black" static-body></a-box>
+			  <a-box id="w12" width="4" height="6" depth="0.1" position="4 3 0" color="black" static-body></a-box>
+			  <a-box id="w13" width="4" height="0" depth="0.1" position="0 1 0" color="red"></a-box>
+			  <a-box id="w14" width="4" height="2" depth="0.1" position="0 5 0" color="black" static-body></a-box>
+			</a-entity>
+			<a-entity id="w2" rotation="0 90 0" position="6 0 -6" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-4 3 0" color="black"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="4 3 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 1 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 5 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black"></a-box>
+			</a-entity>
+			<a-entity id="w3" rotation="0 90 0" position="-6 0 -6" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-4 3 0" color="black"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="4 3 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 1 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 5 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black"></a-box>
+			</a-entity>
+			<a-entity id="w4" position="0 0 -12">
+			  <a-box id="w112" width="4" height="6" depth="0.1" position="-4 3 0" color="black" static-body></a-box>
+			  <a-box id="w122" width="4" height="6" depth="0.1" position="4 3 0" color="black" static-body></a-box>
+			  <a-box id="w132" width="4" height="0" depth="0.1" position="0 1 0" color="red"></a-box>
+			  <a-box id="w142" width="4" height="2" depth="0.1" position="0 5 0" color="black" static-body></a-box>
+			</a-entity>
+			<a-entity id="floor" position="0 0 -6" static-body>
+			  <a-box width="12" height="0.1" depth="12"  color="black" ></a-box>
+			</a-entity>
+			<a-entity id="roof" position="0 6 -6" static-body>
+			  <a-box width="12" height="0.1" depth="12"  color="black" ></a-box>
+			</a-entity>
+		</a-entity>
+		<a-entity id="endroom2" position="0 0 -12">
+			<a-entity position="0 0 0">
+			  <a-box id="w11" width="4" height="6" depth="0.1" position="-4 3 0" color="black" static-body></a-box>
+			  <a-box id="w12" width="4" height="6" depth="0.1" position="4 3 0" color="black" static-body></a-box>
+			  <a-box id="w13" width="4" height="0" depth="0.1" position="0 1 0" color="red"></a-box>
+			  <a-box id="w14" width="4" height="2" depth="0.1" position="0 5 0" color="black" static-body></a-box>
+			</a-entity>
+			<a-entity id="w2" rotation="0 90 0" position="6 0 -6" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-4 3 0" color="black"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="4 3 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 1 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 5 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black"></a-box>
+			</a-entity>
+			<a-entity id="w3" rotation="0 90 0" position="-6 0 -6" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-4 3 0" color="black"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="4 3 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 1 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 5 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black"></a-box>
+			</a-entity>
+			<a-entity id="w4" position="0 0 -12" static-body>
+			  <a-box width="4" height="6" depth="0.1" position="-4 3 0" color="black"></a-box>
+			  <a-box width="4" height="6" depth="0.1" position="4 3 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 1 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 5 0" color="black"></a-box>
+			  <a-box width="4" height="2" depth="0.1" position="0 3 0" color="black"></a-box>
+			</a-entity>
+			<a-entity id="floor" position="0 0 -6" static-body>
+			  <a-box width="12" height="0.1" depth="12"  color="black" ></a-box>
+			</a-entity>
+			<a-entity id="roof" position="0 6 -6" static-body>
+			  <a-box width="12" height="0.1" depth="12"  color="black" ></a-box>
+			</a-entity>
+		</a-entity>	
+	</a-entity>	
+	  
+	<a-entity id="table" position="-5 0 0.75" shadow="receive: true" static-body>
+		<a-box width="2" height="1" depth="0.1" position="5 0.75 0" rotation="90 0 0" color="#A1662F"></a-box>
+		<a-box height="1" width="0.1" depth="0.1" position="4.125 0.25 -0.375" rotation="0 0 0" color="#A1662F"></a-box>
+		<a-box height="1" width="0.1" depth="0.1" position="5.875 0.25 0.375" rotation="0 0 0" color="#A1662F"></a-box>
+		<a-box height="1" width="0.1" depth="0.1" position="4.125 0.25 0.375" rotation="0 0 0" color="#A1662F"></a-box>
+		<a-box height="1" width="0.1" depth="0.1" position="5.875 0.25 -0.375" rotation="0 0 0" color="#A1662F"></a-box>
+	</a-entity>
+
+	<a-entity id="keys1" scale="0.125 0.125 0.125" rotation="270 0 0" position="5.25 0.05 0.5">
+		<a-gltf-model src="#key" interact></a-gltf-model>
+	</a-entity>
+
+	<a-entity id="keys2" scale="0.125 0.125 0.125" rotation="270 0 0" position="-3 0.05 12.5">
+		<a-gltf-model src="#key" interact></a-gltf-model>
+	</a-entity>
+
+	<a-entity id="keys3" scale="0.125 0.125 0.125" rotation="270 0 0" position="0 0.05 -45">
+		<a-gltf-model src="#key" interact></a-gltf-model>
+	</a-entity>
+
+	  <a-box position="0 0 12">	</a-box>
+
+	  <a-entity light="type: ambient; color: #fff; intensity:0.02;"></a-entity>
+	  
+	  <a-entity id="maincamera" position="0 1.5 0">
+		<a-camera id="c1" position="0 10.3 10" active="true" kinema-body="radius: 0.8" float-on-ocean="baseHeight: 0">
+		<a-cursor color="white" raycaster="objects: [interact]">
+		<a-text id="timers" position="-3 1 -1" value="Time Spent: " color="white"></a-text>
+		<a-text id="times" position="-3 0.75 -1" value="Time Left: " color="white"></a-text>
+		<a-text id="win" position="-1 1 -1" value="You Win"  scale="2 2 2" visible="false" color="white"></a-text>
+		<a-text id="lose" position="-1 1 -1" value="You Lose" scale="2 2 2" visible="false" color="white"></a-text>
+		<a-text id="keymessage" position="-0.75 -1 -1" value="You picked up a key!" scale="0.75 0.75 0.75" visible="false" color="white"></a-text>
+		<a-text id="doorlocked" position="-1.125 -1 -1" value="Door is locked. Find the key!" scale="0.75 0.75 0.75" visible="false" color="white"></a-text>
+		<a-text id="doorwrong" position="-1.25 -1 -1" value="Wrong door. Find another one!" scale="0.75 0.75 0.75" visible="false" color="white"></a-text>
+		<a-entity id="flashlight">
+			<a-gltf-model src="#flashlight" scale="0.025 0.025 0.025" rotation="-70 0 0" position="0.5 -0.34 0.75"></a-gltf-model>
+			<a-entity id="light" light="type: spot; color: #FFF; castShadow:true; angle: 30; penumbra:0.5 decay: 2; intensity: 0;" position="0 0.15 0.7" rotation="0 0 0"></a-entity>
+		</a-entity>
+      </a-entity>
+	</a-cursor>
+	  </a-camera>
+	 
+	  <a-entity id="securitycamera" position="0 20 0">
+		<a-camera id="c2" active="false" wasd-controls="enabled: false">
+		<a-cursor raycaster="objects: [interact]">
+		<a-text id="timerss" position="-3 1 -1" value="Time Spent: " color="white"></a-text>
+		<a-text id="timess" position="-3 0.75 -1" value="Time Left: " color="white"></a-text>
+		</a-cursor>
+		</a-camera>
+	 </a-entity> 
+
+    </a-scene>
+  </body>
+</html>
