@@ -107,7 +107,7 @@ window.onload = function() {
     }
 
 	new PhyObj(5.25,0.5,0.75,0,0,0,1,"box");
-	new PhyObj(-2.5,0.05,12.5,0,0,0,1,"box");
+	new PhyObj(-5,0.05,12.5,0,0,0,1,"box");
 
 	fillRoom2(100);
 
