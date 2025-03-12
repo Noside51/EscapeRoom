@@ -9,7 +9,7 @@ class PhyObj {
         this.s = s;
         this.o = o;
 
-        shapeTypes = {
+        const shapeTypes = {
             "box": "a-box", "circle": "a-circle", "cone": "a-cone",
             "cylinder": "a-cylinder", "dodecahedron": "a-dodecahedron",
             "octahedron": "a-octahedron", "icosahedron": "a-icosahedron",
