@@ -386,7 +386,7 @@
 	  <a-entity light="type: ambient; color: #fff; intensity:0.02;"></a-entity>
 	  
 	  <a-entity id="maincamera" position="0 1.5 0">
-		<a-camera id="c1" position="0 10.3 10" active="true" kinema-body="radius: 0.8" float-on-ocean="baseHeight: 0">
+		<a-camera id="c1" position="0 10.3 10" active="true" kinema-body="radius: 0.8" float-on-ocean="baseHeight: 0" look-controls="pointerLockEnabled: true">
 		<a-cursor color="white" raycaster="objects: [interact]">
 		<a-text id="timers" position="-3 1 -1" value="Time Spent: " color="white"></a-text>
 		<a-text id="times" position="-3 0.75 -1" value="Time Left: " color="white"></a-text>
@@ -404,7 +404,7 @@
 	  </a-camera>
 	 
 	  <a-entity id="securitycamera" position="0 20 0">
-		<a-camera id="c2" active="false" wasd-controls="enabled: false">
+		<a-camera id="c2" active="false" wasd-controls="enabled: false" look-controls="pointerLockEnabled: true">
 		<a-cursor raycaster="objects: [interact]">
 		<a-text id="timerss" position="-3 1 -1" value="Time Spent: " color="white"></a-text>
 		<a-text id="timess" position="-3 0.75 -1" value="Time Left: " color="white"></a-text>
